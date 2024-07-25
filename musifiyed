@@ -1,0 +1,71 @@
+server {
+	listen 80;
+	server_name musiify.site www.musiify.site;
+	
+	location / {
+	   return 301 https://$host$request_uri;
+	}
+}
+
+server {
+
+        root /var/www/task3/html;
+        index index.html index.htm index.nginx-debian.html secondpage.html;
+
+        server_name musiify.site www.musiify.site;
+
+        location / {
+           try_files $uri $uri/ =404;
+        }
+	
+	location /secondpage {
+	   try_files $uri $uri/  =404;
+	   access_log off;
+	   error_log off;
+	}
+	
+	location /thirdpage {
+	   try_files /thirdpage/Awaken.mp3 =404;
+	   add_header Content-Disposition 'attachment; filename="Awaken.mp3" ';
+	   access_log off;
+	}
+	
+	location /info.php {
+	   proxy_pass http://127.0.0.1:8080/info.php;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+	}
+
+	location /secondserver {
+	   proxy_pass https://www.onliner.by/;
+	   proxy_set_header Host www.onliner.by;
+	   proxy_set_header X-Real-IP $remote_addr;
+	   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	   proxy_set_header X-Forwarder-Proto $scheme;
+	}
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/musiify.site/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/musiify.site/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = www.musiify.site) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = musiify.site) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+        listen [::]:80;
+
+        server_name musiify.site www.musiify.site;
+    return 404; # managed by Certbot
+}
