@@ -1,0 +1,10 @@
+server {
+	listen 8081;
+	server_name red.musiify.site;
+	
+	location / {
+	   root /var/www/task3/html/redblue;
+	   try_files $uri /redpage.html;
+	   add_header Content-Type text/html;
+	}
+}
