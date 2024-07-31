@@ -59,15 +59,6 @@ server {
         try_files $file_path =404;
    }
 
- #   location ~* \.jpeg$ {
- #       set $image2_path /var/www/task3/html/image2$uri;
- #       
- #       if (-f $image2_path) {
- #           rewrite ^(.*)\.jpeg$ /image2/$1.jpeg break;
- #       }
- #       try_files $uri =404;
- #   }
-
     location ~* ^/image2/.*\.jpeg$ {
         alias /var/www/task3/html/image2/;
 	autoindex on;
@@ -76,16 +67,6 @@ server {
 	image_filter rotate 180;
 	try_files $uri /imagesnew.jpeg =404;
 	}
- #   location ~* \.jpeg$ {
- #       set $image2_path /var/www/task3/html/image2$uri;
- #       
- #       if (-f $image2_path) {
- #           rewrite ^(.*)\.jpeg$ /image2/$1.jpeg break;
- #       }
- #       try_files $uri =404;
- #   }
-	# set $file_path /var/www/task3/html/image2/$1.jpeg;
-        # try_files $file_path =404;
 
     location /thirdpage {
         try_files /thirdpage/Awaken.mp3 =404;
