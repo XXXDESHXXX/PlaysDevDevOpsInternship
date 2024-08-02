@@ -1,0 +1,9 @@
+[Unit]
+Description=Monitor CPU and Memory Usage
+
+[Service]
+ExecStart=/var/www/task3/html/monitor.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,85 @@
+# Upstream servers configuration
+upstream redblue {
+    server 127.0.0.1:8081;
+    server 127.0.0.1:8082;
+}
+server {
+    listen 80;
+    server_name musiify.site www.musiify.site;
+    
+    location / {
+    return 301 https://$host$request_uri;
+    }
+}
+# HTTPS server configuration
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl ipv6only=on;
+
+    server_name musiify.site www.musiify.site;
+
+    root /var/www/task3/html;
+    index status.html  index.html index.htm index.nginx-debian.html secondpage.html imagesnew.jpeg images.png testjpeg.jpeg testpng.png;
+
+    ssl_certificate /etc/letsencrypt/live/musiify.site/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/musiify.site/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+    location / {
+	try_files $uri $uri/ =404;
+    }
+
+    location /error500 {
+	return 500;
+    }
+    
+    location /redblue {
+        proxy_pass http://redblue;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        access_log /var/log/nginx/redblue_access.log combined_with_upstream_port;
+        error_log /var/log/nginx/redblue_error.log;
+    }
+	
+    location ~* ^/image1/.*\.png$ {
+	alias /var/www/task3/html/image1/;
+	autoindex on;
+	# image_filter_buffer 2M;
+	image_filter_interlace on;
+	try_files $uri /images.png =404;
+   }
+
+    location ~* ^/image2/.*\.jpeg$ {
+        alias /var/www/task3/html/image2/;
+	autoindex on;
+	image_filter_buffer 2M;
+	image_filter_interlace on;
+	image_filter rotate 180;
+	try_files $uri /imagesnew.jpeg =404;
+	}
+
+    location /thirdpage {
+        try_files /thirdpage/Awaken.mp3 =404;
+        add_header Content-Disposition 'attachment; filename="Awaken.mp3"';
+        access_log off;
+    }
+
+    location /info.php {
+        proxy_pass http://127.0.0.1:8080/info.php;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /secondserver {
+        proxy_pass https://www.onliner.by/;
+        proxy_set_header Host www.onliner.by;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
